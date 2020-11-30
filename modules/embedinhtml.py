@@ -63,7 +63,7 @@ def convertFromTemplate(parameters, templateFile):
 
 class RC4:
     def __init__(self, key=None):
-        self.state = range(256)  # initialisation de la table de permutation
+        self.state = list(range(256))  # initialisation de la table de permutation
         self.x = self.y = 0  # les index x et y, au lieu de i et j
 
         if key is not None:
@@ -93,7 +93,7 @@ class RC4:
         Decrypt/encrypt the passed data using RC4 and the given key.
         https://github.com/EmpireProject/Empire/blob/73358262acc8ed3c34ffc87fa593655295b81434/data/agent/stagers/dropbox.py
         """
-        S, j, out = range(256), 0, []
+        S, j, out = list(range(256)), 0, []
         for i in range(256):
             j = (j + S[i] + ord(self.key[i % len(self.key)])) % 256
             S[i], S[j] = S[j], S[i]
@@ -115,7 +115,7 @@ def run_embedInHtml(key, fileName, outFileName, template_name):
     if key and fileName and outFileName:
         try:
             with open(fileName) as fileHandle:
-                fileBytes = bytearray(fileHandle.read())
+                fileBytes = bytes(fileHandle.read(), encoding='utf-8')
                 fileHandle.close()
                 print("\033[1;34m[*]\033[0;0m File [{}] successfully loaded !".format(fileName))
         except IOError:
@@ -134,7 +134,7 @@ def run_embedInHtml(key, fileName, outFileName, template_name):
             print("\033[93m[!]\033[0;0m Could not determine the mime type for the input file. Force it using the -m switch.")
             quit()
 
-        payload = base64.b64encode(rc4Encryptor.binaryEncrypt(fileBytes))
+        payload = base64.b64encode(bytes(rc4Encryptor.binaryEncrypt(fileBytes), encoding='utf-8'))
         print("\033[1;34m[*]\033[0;0m Encrypted input file with key [{}]".format(key))
 
         # blobShim borrowed from https://github.com/mholt/PapaParse/issues/175#issuecomment-75597039
@@ -153,8 +153,8 @@ def run_embedInHtml(key, fileName, outFileName, template_name):
         varBlobObjectName = rand()
         varBlob = rand()
         varBlobShim = rand()
-        blobShimEncrypted = base64.b64encode(rc4Encryptor.stringEncrypt(blobShim))
-        blobObjectNameEncrypted = base64.b64encode(rc4Encryptor.stringEncrypt("Blob"))
+        blobShimEncrypted = base64.b64encode(bytes(rc4Encryptor.stringEncrypt(blobShim), encoding='utf-8'))
+        blobObjectNameEncrypted = base64.b64encode(bytes(rc4Encryptor.stringEncrypt("Blob"), encoding='utf-8'))
         fileName = os.path.basename(fileName)
 
         params = {
